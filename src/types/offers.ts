@@ -9,4 +9,5 @@ export interface Offer {
   quo_values: string | null;
   quo_no: string | null;
   status: string | null;
+  attachments: string[] | null;
 }

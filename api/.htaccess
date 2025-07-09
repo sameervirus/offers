@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /api/
+
+# Redirect all requests to index.php if the file or folder does not exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1

@@ -38,7 +38,14 @@ export default function OffersList() {
           token,
           searchTerm
         );
-        setOffers(res.data);
+        const offersWithParsedAttachments = res.data.map((offer: Offer) => ({
+          ...offer,
+          attachments:
+            typeof offer.attachments === "string"
+              ? JSON.parse(offer.attachments)
+              : offer.attachments,
+        }));
+        setOffers(offersWithParsedAttachments);
         setPagination({
           total: res.pagination.total,
           total_pages: res.pagination.total_pages,
@@ -188,7 +195,7 @@ export default function OffersList() {
               <th>Service Type</th>
               <th>Quotation Date</th>
               <th>Quotation No#</th>
-              <th>Quotation Value</th>
+              <th>Quotation Files</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -220,7 +227,18 @@ export default function OffersList() {
                     </button>
                   )}
                 </td>
-                <td>{offer.quo_values}</td>
+                <td>
+                  {offer.attachments?.map((file) => (
+                    <a
+                      href={`https://offers.arconsegypt.com/uploads/${offer.id}/${file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      key={file}
+                    >
+                      📄 {file}
+                    </a>
+                  )) || "—"}
+                </td>
                 <td>
                   <span
                     className={`${styles.status} ${

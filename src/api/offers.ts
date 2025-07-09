@@ -98,21 +98,29 @@ export async function getOffer(id: number, token: string): Promise<Offer> {
 
 export async function saveOffer(
   offer: Partial<Offer>,
-  token: string
+  token: string,
+  files: FileList | null
 ): Promise<Offer> {
   try {
     const isEdit = !!offer.id;
     const url = isEdit ? `${API_URL}/offers/${offer.id}` : `${API_URL}/offers`;
 
-    const method = isEdit ? "PUT" : "POST";
+    const method = isEdit ? "POST" : "POST";
+
+    const formData = new FormData();
+    formData.append("offer", JSON.stringify(offer));
+    if (files) {
+      Array.from(files).forEach((file) => {
+        formData.append("files[]", file);
+      });
+    }
 
     const response = await fetch(url, {
       method,
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(offer),
+      body: formData,
     });
 
     const data = await response.json();

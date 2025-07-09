@@ -13,14 +13,7 @@ const WORK_SCOPE_OPTIONS = [
   "Survey",
 ];
 
-const STATUS_OPTIONS = [
-  "Pending",
-  "Approved",
-  "Awarded",
-  "Rejected",
-  "In Progress",
-  "Completed",
-];
+const STATUS_OPTIONS = ["Pending", "Awarded", "Rejected"];
 
 export default function OfferForm() {
   const { id } = useParams();
@@ -36,6 +29,7 @@ export default function OfferForm() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [files, setFiles] = useState<FileList | null>(null);
 
   useEffect(() => {
     if (id && token) {
@@ -69,7 +63,7 @@ export default function OfferForm() {
 
     try {
       setLoading(true);
-      await saveOffer(offer, token);
+      await saveOffer(offer, token, files);
       alert("Saved successfully");
       navigate("/offers");
     } catch (err) {
@@ -215,6 +209,18 @@ export default function OfferForm() {
             value={offer.quo_values || ""}
             onChange={handleChange}
           />
+        </div>
+
+        <div className={`${styles.formGroup} ${styles.col12}`}>
+          <label>
+            Attach Files:
+            <input
+              type="file"
+              multiple
+              onChange={(e) => setFiles(e.target.files)}
+              accept=".pdf"
+            />
+          </label>
         </div>
 
         {/* Action Buttons */}
