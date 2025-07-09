@@ -1,0 +1,12 @@
+POST https://offers.arconsegypt.com/api/login
+Content-Type: application/json
+
+{
+  "username": "view@arconsegypt.com",
+  "password": "123"
+}
+
+###
+
+GET https://offers.arconsegypt.com/api/offers/3
+Content-Type: application/json
