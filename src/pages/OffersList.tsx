@@ -202,7 +202,10 @@ export default function OffersList() {
           </thead>
           <tbody>
             {offers.map((offer) => (
-              <tr key={offer.id}>
+              <tr
+                key={offer.id}
+                className={styles[offer.status?.trim().toLowerCase() || ""]}
+              >
                 <td>{offer.rec_date}</td>
                 <td>{offer.client}</td>
                 <td>{offer.project_name}</td>

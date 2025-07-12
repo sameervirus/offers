@@ -245,31 +245,39 @@ function updateOffer($id)
       mkdir($uploadDir, 0755, true);
     }
 
+    // Get list of files to keep from payload
+    $keepFiles = $data['documents'] ?? []; // e.g. ["file1.pdf", "file2.jpg"]
+
+    // Step 1: Delete unkept files
     $existingFiles = glob($uploadDir . '*');
-    foreach ($existingFiles as $file) {
-      if (is_file($file)) {
-        unlink($file);
+    foreach ($existingFiles as $filePath) {
+      $filename = basename($filePath);
+      if (!in_array($filename, $keepFiles)) {
+        unlink($filePath);
       }
     }
 
-    $uploadedFiles = [];
-
+    // Step 2: Upload new files
+    $newUploadedFiles = [];
     if (isset($_FILES['files']) && is_array($_FILES['files']['tmp_name'])) {
       foreach ($_FILES['files']['tmp_name'] as $index => $tmpName) {
         $originalName = basename($_FILES['files']['name'][$index]);
         $targetPath = $uploadDir . $originalName;
 
         if (move_uploaded_file($tmpName, $targetPath)) {
-          $uploadedFiles[] = $originalName;
+          $newUploadedFiles[] = $originalName;
         }
       }
     }
 
+    // Step 3: Merge kept and new files
+    $finalFiles = array_values(array_unique(array_merge($keepFiles, $newUploadedFiles)));
+
+    // Step 4: Save to DB
     $db->query("UPDATE offers SET attachments = :attachments WHERE id = :id");
-    $db->bind(":attachments", json_encode($uploadedFiles));
+    $db->bind(":attachments", json_encode($finalFiles));
     $db->bind(":id", $id);
     $db->execute();
-
 
     $db->endTransaction();
 

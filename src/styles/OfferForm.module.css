@@ -134,3 +134,23 @@
 .cancelButton:hover {
   background-color: #d0d0d0;
 }
+
+.documentList {
+  padding: 0;
+}
+
+.documentItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  background-color: #f5f7fa;
+  padding: 8px;
+}
+
+.deleteDocButton {
+  cursor: pointer;
+  background-color: rgb(222, 15, 15);
+  color: #fff;
+  padding: 4px 16px;
+  border: none;
+}

@@ -9,6 +9,7 @@
   align-items: center;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid #e0e0e0;
+  flex-direction: column;
 }
 
 .appTitle {
@@ -21,6 +22,7 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-direction: column;
 }
 
 .searchBox {
@@ -61,7 +63,6 @@
 
 .tableContainer {
   overflow-x: auto;
-  box-shadow: 4px 3px 4px 2px #0000001c;
 }
 
 .offersTable {
@@ -84,9 +85,13 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.offersTable tr:hover {
-  background-color: #e3eefe;
+.offersTable td a {
+  display: block;
 }
+
+/* .offersTable tr:hover {
+  background-color: #e3eefe;
+} */
 
 .actionButton {
   background-color: #2ecc71;
@@ -132,6 +137,7 @@
   display: flex;
   justify-content: center;
   margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
   gap: 0.5rem;
 }
 
@@ -242,4 +248,29 @@
 .searchButton:hover,
 .clearButton:hover {
   color: #000;
+}
+
+tr.pending {
+  background-color: #ffe0ae;
+}
+tr.awarded {
+  background-color: #a4dabb;
+}
+tr.rejected {
+  background-color: #555;
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .topBar {
+    flex-direction: row;
+  }
+
+  .controls {
+    flex-direction: row;
+  }
+
+  .tableContainer {
+    box-shadow: 4px 3px 4px 2px #0000001c;
+  }
 }

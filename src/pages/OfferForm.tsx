@@ -30,6 +30,7 @@ export default function OfferForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<FileList | null>(null);
+  const [documents, setDocuments] = useState<string[]>([]);
 
   useEffect(() => {
     if (id && token) {
@@ -37,6 +38,13 @@ export default function OfferForm() {
         try {
           const response = await getOffer(Number(id), token);
           setOffer(response);
+          if (typeof response.attachments === "string") {
+            setDocuments(JSON.parse(response.attachments) ?? []);
+          } else if (Array.isArray(response.attachments)) {
+            setDocuments(response.attachments);
+          } else {
+            setDocuments([]);
+          }
         } catch (err) {
           console.error("Failed to fetch offers:", err);
         }
@@ -54,6 +62,12 @@ export default function OfferForm() {
     setOffer((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDeleteDocument = (file: string) => {
+    if (file && confirm("Are you sure you want delete this file?")) {
+      setDocuments((docs) => docs.filter((doc) => doc !== file));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
@@ -61,9 +75,11 @@ export default function OfferForm() {
       return;
     }
 
+    const updatedOffer = { ...offer, documents };
+
     try {
       setLoading(true);
-      await saveOffer(offer, token, files);
+      await saveOffer(updatedOffer, token, files);
       alert("Saved successfully");
       navigate("/offers");
     } catch (err) {
@@ -222,6 +238,32 @@ export default function OfferForm() {
             />
           </label>
         </div>
+
+        {documents && documents.length > 0 && (
+          <div className={`${styles.formGroup} ${styles.col12}`}>
+            <ul className={styles.documentList}>
+              {documents?.map((file) => (
+                <li key={file} className={styles.documentItem}>
+                  <a
+                    href={`https://offers.arconsegypt.com/uploads/${offer.id}/${file}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {file}
+                  </a>
+                  <button
+                    type="button"
+                    className={styles.deleteDocButton}
+                    onClick={() => handleDeleteDocument(file)}
+                    aria-label={`Delete ${file}`}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className={styles.buttonGroup}>
