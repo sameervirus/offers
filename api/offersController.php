@@ -121,7 +121,7 @@ function addOffer()
     $db->bind(':quo_date', $data['quo_date'] ?? null);
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
-    $db->bind(':status', $data['status'] ?? 'Pending');
+    $db->bind(':status', $data['status'] ?? null);
 
     $db->execute();
     $id = $db->lastInsertId();
@@ -229,7 +229,7 @@ function updateOffer($id)
     $db->bind(':quo_date', $data['quo_date'] ?? null);
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
-    $db->bind(':status', $data['status'] ?? 'Pending');
+    $db->bind(':status', $data['status'] ?? null);
     $db->bind(':id', $id, PDO::PARAM_INT);
 
     $db->execute();

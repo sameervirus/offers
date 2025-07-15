@@ -24,7 +24,7 @@ export default function OfferForm() {
     project_name: "",
     description: "",
     work_type: "",
-    status: "Pending",
+    status: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -179,6 +179,7 @@ export default function OfferForm() {
             value={offer.status || ""}
             onChange={handleChange}
           >
+            <option>Select Status</option>
             {STATUS_OPTIONS.map((status) => (
               <option key={status} value={status}>
                 {status}

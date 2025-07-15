@@ -188,7 +188,7 @@ export default function OffersList() {
         <table className={styles.offersTable}>
           <thead>
             <tr>
-              <th>Date</th>
+              <th style={{ minWidth: "106px" }}>Date</th>
               <th>Client</th>
               <th>Project</th>
               <th>Scope of Work</th>
