@@ -239,6 +239,13 @@ export default function OffersList() {
           <Link to="/offers/new" className={styles.addButton}>
             Add New Offer
           </Link>
+          <button
+            onClick={() => window.print()}
+            className={styles.printButton}
+            title="Print list"
+          >
+            Print
+          </button>
           <button onClick={logout} className={styles.logoutButton}>
             Logout
           </button>
@@ -255,13 +262,13 @@ export default function OffersList() {
               <th style={{ minWidth: "106px" }}>Date</th>
               <th>Client</th>
               <th>Project</th>
-              <th>Scope of Work</th>
+              <th className={styles.scopeCol}>Scope of Work</th>
               <th>Service Type</th>
               <th>Quotation Date</th>
               <th>Quotation No#</th>
               <th>Quotation Files</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th className={styles.actionsCol}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -273,7 +280,7 @@ export default function OffersList() {
                 <td>{offer.rec_date}</td>
                 <td>{offer.client}</td>
                 <td>{offer.project_name}</td>
-                <td>{offer.description}</td>
+                <td className={styles.scopeCol}>{offer.description}</td>
                 <td>{offer.work_type}</td>
                 <td>
                   {offer.quo_date === "0000-00-00" ? null : offer.quo_date}
@@ -315,7 +322,7 @@ export default function OffersList() {
                     {offer.status}
                   </span>
                 </td>
-                <td>
+                <td className={styles.actionsCol}>
                   <Link
                     to={`/offers/${offer.id}`}
                     className={styles.actionButton}

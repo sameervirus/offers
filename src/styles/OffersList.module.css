@@ -56,6 +56,20 @@
   font-size: 0.9rem;
 }
 
+.printButton {
+  background-color: #7f8c8d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.printButton:hover {
+  background-color: #6c7a7a;
+}
+
 .logoutButton:hover {
   background-color: #c0392b;
 }
@@ -288,5 +302,44 @@ tr.rejected {
 
   .tableContainer {
     box-shadow: 4px 3px 4px 2px #0000001c;
+  }
+}
+
+@media print {
+  /* Hide interactive controls that make no sense on paper */
+  .controls,
+  .pagination,
+  .loadingOverlay {
+    display: none !important;
+  }
+
+  /* Hide the Scope of Work column when printing */
+  .scopeCol {
+    display: none !important;
+  }
+
+  /* Hide the Actions column when printing */
+  .actionsCol {
+    display: none !important;
+  }
+
+  .tableContainer {
+    box-shadow: none;
+    overflow: visible !important;
+  }
+
+  .offersTable {
+    width: 100%;
+    font-size: 11px;
+  }
+
+  /* Keep status colours readable in print */
+  tr.rejected {
+    background-color: #eee !important;
+    color: #000 !important;
+  }
+
+  .container {
+    margin: 0;
   }
 }
