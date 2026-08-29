@@ -8,6 +8,18 @@ import React from "react";
 
 const ITEMS_PER_PAGE = 10;
 
+const SERVICE_TYPE_OPTIONS = [
+  "Fabrication",
+  "Erection",
+  "Fabrication & Erection",
+  "Survey",
+];
+
+const STATUS_OPTIONS = ["Pending", "Awarded", "Rejected"];
+
+// Sentinel value for the "No Status" option (offers with an empty/null status).
+const NO_STATUS = "__none__";
+
 export default function OffersList() {
   const navigate = useNavigate();
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -20,6 +32,8 @@ export default function OffersList() {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +50,9 @@ export default function OffersList() {
           currentPage,
           ITEMS_PER_PAGE,
           token,
-          searchTerm
+          searchTerm,
+          serviceTypeFilter,
+          statusFilter === NO_STATUS ? "" : statusFilter
         );
         const offersWithParsedAttachments = res.data.map((offer: Offer) => ({
           ...offer,
@@ -59,7 +75,7 @@ export default function OffersList() {
     };
 
     fetchOffers();
-  }, [currentPage, token, searchTerm]);
+  }, [currentPage, token, searchTerm, serviceTypeFilter, statusFilter]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure?")) return;
@@ -77,13 +93,25 @@ export default function OffersList() {
   };
 
   const filteredOffers = useMemo(() => {
-    return offers.filter((offer) =>
-      [offer.client, offer.project_name, offer.quo_no]
+    return offers.filter((offer) => {
+      const matchesSearch = [offer.client, offer.project_name, offer.quo_no]
         .join(" ")
         .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
-  }, [offers, searchTerm]);
+        .includes(searchTerm.toLowerCase());
+
+      const matchesServiceType =
+        !serviceTypeFilter || offer.work_type === serviceTypeFilter;
+
+      const offerStatus = offer.status?.trim() || "";
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === NO_STATUS
+          ? offerStatus === ""
+          : offerStatus === statusFilter);
+
+      return matchesSearch && matchesServiceType && matchesStatus;
+    });
+  }, [offers, searchTerm, serviceTypeFilter, statusFilter]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= pagination.total_pages) {
@@ -172,6 +200,42 @@ export default function OffersList() {
               🔍
             </button>
           </div>
+
+          <select
+            className={styles.filterSelect}
+            value={serviceTypeFilter}
+            onChange={(e) => {
+              setServiceTypeFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            title="Filter by service type"
+          >
+            <option value="">All Service Types</option>
+            {SERVICE_TYPE_OPTIONS.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+
+          <select
+            className={styles.filterSelect}
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            title="Filter by status"
+          >
+            <option value="">All Statuses</option>
+            {STATUS_OPTIONS.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+            <option value={NO_STATUS}>No Status</option>
+          </select>
+
           <Link to="/offers/new" className={styles.addButton}>
             Add New Offer
           </Link>
@@ -201,7 +265,7 @@ export default function OffersList() {
             </tr>
           </thead>
           <tbody>
-            {offers.map((offer) => (
+            {filteredOffers.map((offer) => (
               <tr
                 key={offer.id}
                 className={styles[offer.status?.trim().toLowerCase() || ""]}

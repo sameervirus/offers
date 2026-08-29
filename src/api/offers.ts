@@ -56,13 +56,21 @@ export async function getOffers(
   page: number,
   limit: number,
   token: string,
-  searchTerm?: string
+  searchTerm?: string,
+  workType?: string,
+  status?: string
 ): Promise<PaginatedResponse> {
   const url = new URL(`${API_URL}/offers`);
   url.searchParams.append("page", String(page));
   url.searchParams.append("limit", String(limit));
   if (searchTerm) {
     url.searchParams.append("search", searchTerm);
+  }
+  if (workType) {
+    url.searchParams.append("work_type", workType);
+  }
+  if (status) {
+    url.searchParams.append("status", status);
   }
 
   const response = await fetch(url.toString(), {
