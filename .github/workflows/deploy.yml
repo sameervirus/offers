@@ -43,7 +43,7 @@ jobs:
           local-dir: ./dist/
           # Remote docroot for offers.arconsegypt.com. Trailing slash is required.
           # Adjust if the subdomain points somewhere else (e.g. ./public_html/offers/).
-          server-dir: ./public_html/offers/
+          server-dir: ./
           # Keep files that are not part of the build (e.g. the PHP api/ folder,
           # .htaccess, uploads/). Set to true only for a full wipe-and-replace.
           dangerous-clean-slate: false
