@@ -1,0 +1,55 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never run two deploys at the same time; cancel an in-progress one on a new push.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to server via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Use "ftp" if your host does not support explicit TLS on port 21.
+          protocol: ftps
+          port: 21
+          # Built output. Trailing slash is required.
+          local-dir: ./dist/
+          # Remote docroot for offers.arconsegypt.com. Trailing slash is required.
+          # Adjust if the subdomain points somewhere else (e.g. ./public_html/offers/).
+          server-dir: ./public_html/offers/
+          # Keep files that are not part of the build (e.g. the PHP api/ folder,
+          # .htaccess, uploads/). Set to true only for a full wipe-and-replace.
+          dangerous-clean-slate: false
+          # Speeds up subsequent deploys by only uploading changed files.
+          state-name: .ftp-deploy-sync-state.json
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**

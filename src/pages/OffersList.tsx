@@ -52,7 +52,7 @@ export default function OffersList() {
           token,
           searchTerm,
           serviceTypeFilter,
-          statusFilter === NO_STATUS ? "" : statusFilter
+          statusFilter
         );
         const offersWithParsedAttachments = res.data.map((offer: Offer) => ({
           ...offer,

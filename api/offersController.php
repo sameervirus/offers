@@ -9,15 +9,34 @@ function getOffers()
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $workType = isset($_GET['work_type']) ? trim($_GET['work_type']) : '';
+    $status = isset($_GET['status']) ? trim($_GET['status']) : '';
     $offset = ($page - 1) * $limit;
 
-    $where = "";
+    $conditions = [];
     $params = [];
 
     if (!empty($search)) {
-      $where = "WHERE client LIKE :search OR project_name LIKE :search OR quo_no LIKE :search";
+      $conditions[] = "(client LIKE :search OR project_name LIKE :search OR quo_no LIKE :search)";
       $params[':search'] = "%$search%";
     }
+
+    if (!empty($workType)) {
+      $conditions[] = "work_type = :work_type";
+      $params[':work_type'] = $workType;
+    }
+
+    if ($status !== '') {
+      if ($status === '__none__') {
+        // "No Status" filter: rows with an empty or NULL status
+        $conditions[] = "(status IS NULL OR status = '')";
+      } else {
+        $conditions[] = "status = :status";
+        $params[':status'] = $status;
+      }
+    }
+
+    $where = count($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
     // Count
     $db->query("SELECT COUNT(*) as total FROM offers $where");
