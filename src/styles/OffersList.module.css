@@ -305,12 +305,39 @@ tr.rejected {
   }
 }
 
+/* Print-only footer: hidden on screen, repeated on every printed page */
+.printFooter {
+  display: none;
+}
+
 @media print {
   /* Hide interactive controls that make no sense on paper */
   .controls,
   .pagination,
   .loadingOverlay {
     display: none !important;
+  }
+
+  /* Repeating footer on every printed page */
+  .printFooter {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 6px 12px;
+    border-top: 1px solid #000;
+    font-size: 10px;
+    background: #fff;
+  }
+
+  /* Reserve space so the fixed footer never overlaps table rows */
+  .container {
+    margin: 0;
+    padding-bottom: 40px;
   }
 
   /* Hide the Scope of Work column when printing */
@@ -333,13 +360,32 @@ tr.rejected {
     font-size: 11px;
   }
 
-  /* Keep status colours readable in print */
+  /* Hide the "Assign no." button on paper */
+  .printHide {
+    display: none !important;
+  }
+
+  /* Force plain white background with no coloured rows in print */
+  .container,
+  .tableContainer,
+  .offersTable,
+  .offersTable th,
+  .offersTable td,
+  .offersTable tr,
+  tr.pending,
+  tr.awarded,
   tr.rejected {
-    background-color: #eee !important;
+    background-color: #fff !important;
     color: #000 !important;
   }
 
-  .container {
-    margin: 0;
+  .status,
+  .status.pending,
+  .status.approved,
+  .status.awarded,
+  .status.rejected {
+    background-color: transparent !important;
+    color: #000 !important;
+    padding: 0 !important;
   }
 }

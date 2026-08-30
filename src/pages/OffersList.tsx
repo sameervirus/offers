@@ -290,6 +290,7 @@ export default function OffersList() {
                     offer.quo_no
                   ) : (
                     <button
+                      className={styles.printHide}
                       onClick={() =>
                         handleAssignNo(
                           offer.id,
@@ -414,6 +415,13 @@ export default function OffersList() {
           </button>
         </div>
       )}
+
+      <div className={styles.printFooter} dir="rtl">
+        <span>دليل الجودة الخاص بشركة أركونز</span>
+        <span>إصدار رقم (2)</span>
+        <span>نموذج رقم F-22-03</span>
+        <span>1/11/2025</span>
+      </div>
     </div>
   );
 }
