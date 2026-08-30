@@ -52,7 +52,7 @@ export default function OffersList() {
           token,
           searchTerm,
           serviceTypeFilter,
-          statusFilter
+          statusFilter,
         );
         const offersWithParsedAttachments = res.data.map((offer: Offer) => ({
           ...offer,
@@ -131,8 +131,8 @@ export default function OffersList() {
           prevOffers.map((offer) =>
             offer.id === id
               ? { ...offer, quo_no: newQuoNo, quo_date: today }
-              : offer
-          )
+              : offer,
+          ),
         );
 
         console.log("Assigned quo_no:", newQuoNo);
@@ -266,7 +266,7 @@ export default function OffersList() {
               <th>Service Type</th>
               <th>Quotation Date</th>
               <th>Quotation No#</th>
-              <th>Quotation Files</th>
+              <th className={styles.scopeCol}>Quotation Files</th>
               <th>Status</th>
               <th className={styles.actionsCol}>Actions</th>
             </tr>
@@ -294,7 +294,7 @@ export default function OffersList() {
                       onClick={() =>
                         handleAssignNo(
                           offer.id,
-                          offer.work_type === "Erection" ? "QU" : "FQU"
+                          offer.work_type === "Erection" ? "QU" : "FQU",
                         )
                       }
                     >
@@ -302,7 +302,7 @@ export default function OffersList() {
                     </button>
                   )}
                 </td>
-                <td>
+                <td className={styles.scopeCol}>
                   {offer.attachments?.map((file) => (
                     <a
                       href={`https://offers.arconsegypt.com/uploads/${offer.id}/${file}`}
@@ -368,7 +368,7 @@ export default function OffersList() {
                 // Show 2 pages before and after current page
                 page === 1 ||
                 page === pagination.total_pages ||
-                (page >= currentPage - 2 && page <= currentPage + 2)
+                (page >= currentPage - 2 && page <= currentPage + 2),
             )
             .map((page, index, array) => {
               const prevPage = array[index - 1];
