@@ -43,10 +43,11 @@ if ($uri[0] === 'api' && $uri[1] === 'offers') {
       $id ? getSingleOffer($id) : getOffers();
       break;
     case 'POST':
-      addOffer($input);
-      break;
-    case 'PUT':
-      updateOffer($id, $input);
+      if ($id) {
+        updateOffer($id, $input);
+      } else {
+        addOffer($input);
+      }
       break;
     case 'DELETE':
       deleteOffer($id);

@@ -113,8 +113,6 @@ export async function saveOffer(
     const isEdit = !!offer.id;
     const url = isEdit ? `${API_URL}/offers/${offer.id}` : `${API_URL}/offers`;
 
-    const method = isEdit ? "POST" : "POST";
-
     const formData = new FormData();
     formData.append("offer", JSON.stringify(offer));
     if (files) {
@@ -124,7 +122,7 @@ export async function saveOffer(
     }
 
     const response = await fetch(url, {
-      method,
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -9,15 +9,34 @@ function getOffers()
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $workType = isset($_GET['work_type']) ? trim($_GET['work_type']) : '';
+    $status = isset($_GET['status']) ? trim($_GET['status']) : '';
     $offset = ($page - 1) * $limit;
 
-    $where = "";
+    $conditions = [];
     $params = [];
 
     if (!empty($search)) {
-      $where = "WHERE client LIKE :search OR project_name LIKE :search OR quo_no LIKE :search";
+      $conditions[] = "(client LIKE :search OR project_name LIKE :search OR quo_no LIKE :search)";
       $params[':search'] = "%$search%";
     }
+
+    if (!empty($workType)) {
+      $conditions[] = "work_type = :work_type";
+      $params[':work_type'] = $workType;
+    }
+
+    if ($status !== '') {
+      if ($status === '__none__') {
+        // "No Status" filter: rows with an empty or NULL status
+        $conditions[] = "(status IS NULL OR status = '')";
+      } else {
+        $conditions[] = "status = :status";
+        $params[':status'] = $status;
+      }
+    }
+
+    $where = count($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
     // Count
     $db->query("SELECT COUNT(*) as total FROM offers $where");
@@ -68,13 +87,28 @@ function getSingleOffer($id)
   }
 }
 
-function addOffer($data)
+function addOffer()
 {
   global $db;
 
+  // Decode offer from FormData
+  $rawData = $_POST['offer'] ?? null;
+  if (!$rawData) {
+    http_response_code(400);
+    echo json_encode(['status' => false, 'error' => 'Missing offer payload.']);
+    return;
+  }
+
+  $data = json_decode($rawData, true);
+  if (!is_array($data)) {
+    http_response_code(400);
+    echo json_encode(['status' => false, 'error' => 'Invalid offer JSON.']);
+    return;
+  }
+
+  // Validate required fields
   $requiredFields = ['client', 'rec_date', 'project_name', 'work_type'];
   $errors = [];
-
   foreach ($requiredFields as $field) {
     if (empty(trim($data[$field] ?? ''))) {
       $errors[$field] = "$field is required.";
@@ -90,11 +124,12 @@ function addOffer($data)
   try {
     $db->beginTransaction();
 
+    // Insert new offer
     $query = "INSERT INTO offers (
-        rec_date, client, project_name, description, work_type, quo_date, quo_values, quo_no, status
-      ) VALUES (
-        :rec_date, :client, :project_name, :description, :work_type, :quo_date, :quo_values, :quo_no, :status
-      )";
+      rec_date, client, project_name, description, work_type, quo_date, quo_values, quo_no, status
+    ) VALUES (
+      :rec_date, :client, :project_name, :description, :work_type, :quo_date, :quo_values, :quo_no, :status
+    )";
 
     $db->query($query);
     $db->bind(':rec_date', $data['rec_date']);
@@ -105,13 +140,39 @@ function addOffer($data)
     $db->bind(':quo_date', $data['quo_date'] ?? null);
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
-    $db->bind(':status', $data['status'] ?? 'Pending');
+    $db->bind(':status', $data['status'] ?? null);
 
     $db->execute();
     $id = $db->lastInsertId();
 
+    // Handle file uploads
+    $uploadedFiles = [];
+    if (!empty($_FILES['files']['tmp_name'])) {
+      $uploadDir = __DIR__ . '/../uploads/' . $id . '/';
+      if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+      }
+
+      foreach ($_FILES['files']['tmp_name'] as $index => $tmpName) {
+        $originalName = basename($_FILES['files']['name'][$index]);
+        $targetPath = $uploadDir . $originalName;
+
+        if (move_uploaded_file($tmpName, $targetPath)) {
+          $uploadedFiles[] = $originalName;
+        }
+      }
+
+      if (!empty($uploadedFiles)) {
+        $db->query("UPDATE offers SET attachments = :attachments WHERE id = :id");
+        $db->bind(":attachments", json_encode($uploadedFiles));
+        $db->bind(":id", $id);
+        $db->execute();
+      }
+    }
+
+    // Fetch offer with attachments if any
     $db->query("SELECT * FROM offers WHERE id = :id");
-    $db->bind(':id', $id, PDO::PARAM_INT);
+    $db->bind(':id', $id);
     $offer = $db->fetch();
 
     $db->endTransaction();
@@ -128,9 +189,25 @@ function addOffer($data)
   }
 }
 
-function updateOffer($id, $data)
+
+function updateOffer($id)
 {
   global $db;
+
+  // Decode offer from FormData
+  $rawData = $_POST['offer'] ?? null;
+  if (!$rawData) {
+    http_response_code(400);
+    echo json_encode(['status' => false, 'error' => 'Missing offer payload.']);
+    return;
+  }
+
+  $data = json_decode($rawData, true);
+  if (!is_array($data)) {
+    http_response_code(400);
+    echo json_encode(['status' => false, 'error' => 'Invalid offer JSON.']);
+    return;
+  }
 
   $requiredFields = ['client', 'rec_date', 'project_name', 'work_type'];
   $errors = [];
@@ -171,7 +248,7 @@ function updateOffer($id, $data)
     $db->bind(':quo_date', $data['quo_date'] ?? null);
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
-    $db->bind(':status', $data['status'] ?? 'Pending');
+    $db->bind(':status', $data['status'] ?? null);
     $db->bind(':id', $id, PDO::PARAM_INT);
 
     $db->execute();
@@ -179,6 +256,47 @@ function updateOffer($id, $data)
     $db->query("SELECT * FROM offers WHERE id = :id");
     $db->bind(':id', $id, PDO::PARAM_INT);
     $offer = $db->fetch();
+
+    $uploadDir = __DIR__ . '/../uploads/' . $id . '/';
+
+    // Create folder if not exists
+    if (!file_exists($uploadDir)) {
+      mkdir($uploadDir, 0755, true);
+    }
+
+    // Get list of files to keep from payload
+    $keepFiles = $data['documents'] ?? []; // e.g. ["file1.pdf", "file2.jpg"]
+
+    // Step 1: Delete unkept files
+    $existingFiles = glob($uploadDir . '*');
+    foreach ($existingFiles as $filePath) {
+      $filename = basename($filePath);
+      if (!in_array($filename, $keepFiles)) {
+        unlink($filePath);
+      }
+    }
+
+    // Step 2: Upload new files
+    $newUploadedFiles = [];
+    if (isset($_FILES['files']) && is_array($_FILES['files']['tmp_name'])) {
+      foreach ($_FILES['files']['tmp_name'] as $index => $tmpName) {
+        $originalName = basename($_FILES['files']['name'][$index]);
+        $targetPath = $uploadDir . $originalName;
+
+        if (move_uploaded_file($tmpName, $targetPath)) {
+          $newUploadedFiles[] = $originalName;
+        }
+      }
+    }
+
+    // Step 3: Merge kept and new files
+    $finalFiles = array_values(array_unique(array_merge($keepFiles, $newUploadedFiles)));
+
+    // Step 4: Save to DB
+    $db->query("UPDATE offers SET attachments = :attachments WHERE id = :id");
+    $db->bind(":attachments", json_encode($finalFiles));
+    $db->bind(":id", $id);
+    $db->execute();
 
     $db->endTransaction();
 
