@@ -338,20 +338,20 @@ function getNewNumber($data)
   try {
     $currentYear = date("Y");
 
-    // Filter only offers for this code and this year
+    // Filter only offers for this code and this year, excluding this offer itself
     $likeCode = $data['code'] . '-%-' . $currentYear . '-Rev.0';
 
-    $db->query("SELECT quo_no FROM offers WHERE quo_no LIKE :code ORDER BY id DESC LIMIT 1");
+    $db->query("SELECT quo_no FROM offers WHERE quo_no LIKE :code AND id != :id");
     $db->bind(":code", $likeCode);
-    $lastOffer = $db->fetch();
+    $db->bind(":id", $data['id']);
+    $matchingOffers = $db->fetchAll();
 
-    if ($lastOffer) {
-      $parts = explode('-', $lastOffer['quo_no']);
-      $lastNumber = (int)$parts[1];
-      $newNumber = $lastNumber + 1;
-    } else {
-      $newNumber = 1;
+    $lastNumber = 0;
+    foreach ($matchingOffers as $offer) {
+      $parts = explode('-', $offer['quo_no']);
+      $lastNumber = max($lastNumber, (int)$parts[1]);
     }
+    $newNumber = $lastNumber + 1;
 
     $newQuoNo = sprintf("%s-%03d-%s-Rev.0", $data['code'], $newNumber, $currentYear);
 
