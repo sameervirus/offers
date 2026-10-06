@@ -100,7 +100,7 @@ export default function OfferForm() {
 
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit} className={styles.formGrid}>
-        {/* Row 1: Date (col3) + Client (col6) + Due Date (col3) */}
+        {/* Row 1: Date (col3) + Client (col9) */}
         <div className={`${styles.formGroup} ${styles.col3}`}>
           <label htmlFor="rec_date">Date</label>
           <input
@@ -112,7 +112,7 @@ export default function OfferForm() {
           />
         </div>
 
-        <div className={`${styles.formGroup} ${styles.col6}`}>
+        <div className={`${styles.formGroup} ${styles.col9}`}>
           <label htmlFor="client">Client *</label>
           <input
             id="client"
@@ -121,19 +121,6 @@ export default function OfferForm() {
             value={offer.client}
             onChange={handleChange}
             required
-          />
-        </div>
-
-        <div className={`${styles.formGroup} ${styles.col3}`}>
-          <label htmlFor="due_date">
-            Due Date <span className={styles.optionalBadge}>(optional)</span>
-          </label>
-          <input
-            id="due_date"
-            name="due_date"
-            type="date"
-            value={offer.due_date || ""}
-            onChange={handleChange}
           />
         </div>
 
@@ -163,8 +150,8 @@ export default function OfferForm() {
           />
         </div>
 
-        {/* Row 4: Work Scope (col6) + Status (col6) */}
-        <div className={`${styles.formGroup} ${styles.col6}`}>
+        {/* Row 4: Work Scope (col4) + Status (col4) + Due Date (col4) */}
+        <div className={`${styles.formGroup} ${styles.col4}`}>
           <label htmlFor="work_type">Work Scope *</label>
           <select
             id="work_type"
@@ -182,7 +169,7 @@ export default function OfferForm() {
           </select>
         </div>
 
-        <div className={`${styles.formGroup} ${styles.col6}`}>
+        <div className={`${styles.formGroup} ${styles.col4}`}>
           <label htmlFor="status">
             Status <span className={styles.optionalBadge}>(optional)</span>
           </label>
@@ -192,13 +179,26 @@ export default function OfferForm() {
             value={offer.status || ""}
             onChange={handleChange}
           >
-            <option>Select Status</option>
+            <option value="">Select Status</option>
             {STATUS_OPTIONS.map((status) => (
               <option key={status} value={status}>
                 {status}
               </option>
             ))}
           </select>
+        </div>
+
+        <div className={`${styles.formGroup} ${styles.col4}`}>
+          <label htmlFor="due_date">
+            Due Date <span className={styles.optionalBadge}>(optional)</span>
+          </label>
+          <input
+            id="due_date"
+            name="due_date"
+            type="date"
+            value={offer.due_date || ""}
+            onChange={handleChange}
+          />
         </div>
 
         {/* Row 5: Offer No. (col4) + Offer Date (col4) + Offer Value (col4) */}

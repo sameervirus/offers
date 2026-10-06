@@ -126,9 +126,10 @@ function addOffer()
 
     // Insert new offer
     $query = "INSERT INTO offers (
-      rec_date, client, project_name, description, work_type, quo_date, quo_values, quo_no, status, due_date
+      rec_date, client, project_name, description, work_type, quo_date, quo_values, quo_no, status, status_changed_at, due_date
     ) VALUES (
-      :rec_date, :client, :project_name, :description, :work_type, :quo_date, :quo_values, :quo_no, :status, :due_date
+      :rec_date, :client, :project_name, :description, :work_type, :quo_date, :quo_values, :quo_no, :status,
+      IF(:has_status, NOW(), NULL), :due_date
     )";
 
     $db->query($query);
@@ -141,6 +142,7 @@ function addOffer()
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
     $db->bind(':status', $data['status'] ?? null);
+    $db->bind(':has_status', !empty($data['status']) ? 1 : 0);
     $db->bind(':due_date', !empty($data['due_date']) ? $data['due_date'] : null);
 
     $db->execute();
@@ -237,6 +239,8 @@ function updateOffer($id)
         quo_date = :quo_date,
         quo_values = :quo_values,
         quo_no = :quo_no,
+        -- Must come before the status assignment (MySQL applies SET assignments left to right).
+        status_changed_at = IF(NULLIF(status, '') <=> NULLIF(:status_new, ''), status_changed_at, NOW()),
         status = :status,
         due_date = :due_date
       WHERE id = :id";
@@ -251,6 +255,7 @@ function updateOffer($id)
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
     $db->bind(':status', $data['status'] ?? null);
+    $db->bind(':status_new', $data['status'] ?? null);
     $db->bind(':due_date', !empty($data['due_date']) ? $data['due_date'] : null);
     $db->bind(':id', $id, PDO::PARAM_INT);
 

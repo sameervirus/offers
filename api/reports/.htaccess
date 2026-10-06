@@ -1,0 +1,5 @@
+# Only run.php may be called from the web (it checks cron_key itself).
+# config.php, data.php and html.php are included by run.php only.
+<FilesMatch "^(?!run\.php$).*$">
+  Require all denied
+</FilesMatch>
