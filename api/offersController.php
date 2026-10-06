@@ -337,22 +337,25 @@ function getNewNumber($data)
 
   try {
     $currentYear = date("Y");
-
-    // Filter only offers for this code and this year
-    $likeCode = $data['code'] . '-%-' . $currentYear . '-Rev.0';
-
-    $db->query("SELECT quo_no FROM offers WHERE quo_no LIKE :code ORDER BY id DESC LIMIT 1");
+    $prefix = $data['code'] . '-';
+    $suffix = '-' . $currentYear . '-Rev.0';
+    $likeCode = $prefix . '%' . $suffix;
+    
+    // Extract the middle number by removing prefix and suffix inside SQL
+    $sql = "SELECT MAX(CAST(REPLACE(REPLACE(quo_no, :prefix, ''), :suffix, '') AS UNSIGNED)) as max_num 
+            FROM offers 
+            WHERE quo_no LIKE :code AND id != :id";
+    
+    $db->query($sql);
+    $db->bind(":prefix", $prefix);
+    $db->bind(":suffix", $suffix);
     $db->bind(":code", $likeCode);
-    $lastOffer = $db->fetch();
-
-    if ($lastOffer) {
-      $parts = explode('-', $lastOffer['quo_no']);
-      $lastNumber = (int)$parts[1];
-      $newNumber = $lastNumber + 1;
-    } else {
-      $newNumber = 1;
-    }
-
+    $db->bind(":id", $data['id']);
+    
+    $result = $db->fetch(); // Assuming fetch() retrieves a single row
+    $lastNumber = $result['max_num'] ?? 0;
+    
+    $newNumber = $lastNumber + 1;
     $newQuoNo = sprintf("%s-%03d-%s-Rev.0", $data['code'], $newNumber, $currentYear);
 
     // Update the row with the generated quo_no
