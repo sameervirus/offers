@@ -22,6 +22,9 @@ return [
     'cc' => ['atef.adly@arconsegypt.com'],
   ],
 
+  // Both reports ignore offers received before this date (YYYY-MM-DD). Empty = include all offers.
+  'start_date' => '2026-09-01',
+
   // Offers due within this many days are flagged as "due soon".
   'due_soon_days' => 7,
 
@@ -30,5 +33,5 @@ return [
 
   // Required to run a report from a URL (e.g. cron with wget/curl, or preview in the browser).
   // Not needed when cron runs the script with the php command.
-  'cron_key' => 'CHANGE_ME',
+  'cron_key' => 'e19df867629f4921d5d78d18cc6baf11',
 ];

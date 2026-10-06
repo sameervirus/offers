@@ -298,11 +298,11 @@ function renderWeeklyReport(array $data, array $config)
     ],
   ]);
 
-  $year = substr($data['year_start'], 0, 4);
+  $since = fmtDate($data['year_start']);
   $body .= section(
-    "Pipeline $year by work scope",
-    $data['matrix'] ? pipelineTable($data['matrix']) : emptyNote("No offers received in $year yet."),
-    'Offers received since 1 Jan, by current status. Win rate = Awarded ÷ (Awarded + Rejected).'
+    'Pipeline by work scope',
+    $data['matrix'] ? pipelineTable($data['matrix']) : emptyNote("No offers received since $since yet."),
+    "Offers received since $since, by current status. Win rate = Awarded ÷ (Awarded + Rejected)."
   );
 
   $body .= section(

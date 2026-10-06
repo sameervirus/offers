@@ -49,14 +49,20 @@ require_once __DIR__ . '/html.php';
 
 $today = date('Y-m-d');
 
+// Offers received before start_date are ignored by both reports.
+$startDate = $config['start_date'] ?? '';
+if ($startDate !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)) {
+  exit("Invalid start_date in config.php, expected YYYY-MM-DD.\n");
+}
+
 try {
   if ($type === 'daily') {
-    $data = dailyReportData($today, (int)$config['due_soon_days']);
+    $data = dailyReportData($today, (int)$config['due_soon_days'], $startDate);
     $html = renderDailyReport($data, $config);
     $subject = dailySubject($data);
     $skip = $data['total'] === 0 && empty($config['daily']['send_when_empty']);
   } else {
-    $data = weeklyReportData($today, (int)$config['follow_up_days']);
+    $data = weeklyReportData($today, (int)$config['follow_up_days'], $startDate);
     $html = renderWeeklyReport($data, $config);
     $subject = weeklySubject($data);
     $skip = false;
