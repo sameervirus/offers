@@ -126,9 +126,9 @@ function addOffer()
 
     // Insert new offer
     $query = "INSERT INTO offers (
-      rec_date, client, project_name, description, work_type, quo_date, quo_values, quo_no, status
+      rec_date, client, project_name, description, work_type, quo_date, quo_values, quo_no, status, due_date
     ) VALUES (
-      :rec_date, :client, :project_name, :description, :work_type, :quo_date, :quo_values, :quo_no, :status
+      :rec_date, :client, :project_name, :description, :work_type, :quo_date, :quo_values, :quo_no, :status, :due_date
     )";
 
     $db->query($query);
@@ -141,6 +141,7 @@ function addOffer()
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
     $db->bind(':status', $data['status'] ?? null);
+    $db->bind(':due_date', !empty($data['due_date']) ? $data['due_date'] : null);
 
     $db->execute();
     $id = $db->lastInsertId();
@@ -236,7 +237,8 @@ function updateOffer($id)
         quo_date = :quo_date,
         quo_values = :quo_values,
         quo_no = :quo_no,
-        status = :status
+        status = :status,
+        due_date = :due_date
       WHERE id = :id";
 
     $db->query($query);
@@ -249,6 +251,7 @@ function updateOffer($id)
     $db->bind(':quo_values', $data['quo_values'] ?? null);
     $db->bind(':quo_no', $data['quo_no'] ?? null);
     $db->bind(':status', $data['status'] ?? null);
+    $db->bind(':due_date', !empty($data['due_date']) ? $data['due_date'] : null);
     $db->bind(':id', $id, PDO::PARAM_INT);
 
     $db->execute();

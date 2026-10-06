@@ -100,7 +100,7 @@ export default function OfferForm() {
 
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit} className={styles.formGrid}>
-        {/* Row 1: Date (col3) + Client (col9) */}
+        {/* Row 1: Date (col3) + Client (col6) + Due Date (col3) */}
         <div className={`${styles.formGroup} ${styles.col3}`}>
           <label htmlFor="rec_date">Date</label>
           <input
@@ -112,7 +112,7 @@ export default function OfferForm() {
           />
         </div>
 
-        <div className={`${styles.formGroup} ${styles.col9}`}>
+        <div className={`${styles.formGroup} ${styles.col6}`}>
           <label htmlFor="client">Client *</label>
           <input
             id="client"
@@ -121,6 +121,19 @@ export default function OfferForm() {
             value={offer.client}
             onChange={handleChange}
             required
+          />
+        </div>
+
+        <div className={`${styles.formGroup} ${styles.col3}`}>
+          <label htmlFor="due_date">
+            Due Date <span className={styles.optionalBadge}>(optional)</span>
+          </label>
+          <input
+            id="due_date"
+            name="due_date"
+            type="date"
+            value={offer.due_date || ""}
+            onChange={handleChange}
           />
         </div>
 
